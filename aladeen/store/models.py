@@ -1,11 +1,9 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 # Create your models here.
-from django.db import models
 
-# Create your models here.
-
-
+# Promotions - Product : Many to Many
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
     discount = models.FloatField()
@@ -17,18 +15,33 @@ class Collection(models.Model):
     featured_product = models.ForeignKey(
         'Product', on_delete=models.SET_NULL, null=True, related_name='+')
 
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
 # Creating Product entities
 class Product(models.Model):
     title = models.CharField(max_length=255) # go to django fieldtypes to select the appropriate fieldtype and fill required parameters
     # varchar(255) type column
     slug = models.SlugField()
-    description = models.TextField() # Bigger data type
-    unit_price = models.DecimalField(max_digits=6,decimal_places=2) # not max length but counting digits 9999.99 is the highest price here
-    inventory = models.IntegerField()
+    description = models.TextField(null=True,blank=True) # Bigger data type
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]) # not max length but counting digits 9999.99 is the highest price here
+    inventory = models.IntegerField(validators=[MinValueValidator(1)])
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
     # many to many field
-    promotions = models.ManyToManyField(Promotion, related_name='products') # related_name will create a attribute in the promotion class
+    promotions = models.ManyToManyField(Promotion, related_name='products',blank=True) # related_name will create a attribute in the promotion class
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
 
 # Creating Customer entities
 class Customer(models.Model):
@@ -49,6 +62,11 @@ class Customer(models.Model):
     # Now we will create an attribute that will take only 3 values as input, mainly creating a choice field from dropdown menu
     membership = models.CharField(max_length=1,choices=MEMBERSHIP_CHOICES,default=MEMBERSHIP_BRONZE)
 
+    def __str__(self) -> str:
+        return f'{self.first_name} {self.last_name}'
+
+    class Meta:
+        ordering = ['first_name','last_name']
 
 # Creating Order entities
 class Order(models.Model):
