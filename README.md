@@ -1,4 +1,4 @@
-# I'll start building an ecommerce website fully on Django in here by following Mosh Hamedani in his Django tutorial.
+# Developing the Backend for a ecommerce website.
 
 
 # Follow these Steps Carefully to clone this project
